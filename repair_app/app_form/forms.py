@@ -1,12 +1,15 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from .models import User, Request, Comment
+
+
+User = get_user_model()
 
 class UserForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['fio', 'phone', 'login', 'password', 'role']
+        fields = ['username', 'fio', 'phone', 'role']
         widgets = {
-            'password': forms.PasswordInput(),
             'role': forms.Select(choices=User.ROLE_CHOICES),
         }
 

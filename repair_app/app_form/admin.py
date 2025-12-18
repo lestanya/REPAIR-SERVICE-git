@@ -1,20 +1,22 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from .models import User, Request, Comment
 
+
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ['user_id', 'fio', 'phone', 'role', 'login']
-    list_filter = ['role']
-    search_fields = ['fio', 'login']
+class UserAdmin(DjangoUserAdmin):
+    fieldsets = DjangoUserAdmin.fieldsets + (
+        ('Дополнительные данные', {'fields': ('fio', 'phone', 'role')}),
+    )
+    list_display = ('username', 'fio', 'role', 'phone', 'is_staff', 'is_superuser')
+    list_filter = ('role', 'is_staff', 'is_superuser')
+
 
 @admin.register(Request)
 class RequestAdmin(admin.ModelAdmin):
-    list_display = ['request_id', 'climate_tech_type', 'client', 'master', 'request_status', 'start_date']
-    list_filter = ['request_status', 'climate_tech_type', 'start_date']
-    search_fields = ['climate_tech_model', 'problem_description']
+    list_display = ('request_id', 'climate_tech_type', 'request_status', 'client', 'master', 'start_date')
+
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['comment_id', 'request', 'master', 'message', 'created_at']
-    list_filter = ['created_at']
-
+    list_display = ('comment_id', 'request', 'master', 'created_at')

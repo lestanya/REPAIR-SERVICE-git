@@ -1,30 +1,32 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
-from django.db import models
 
 
-class User(models.Model):
+class User(AbstractUser):
     """
-    Пользователь системы: менеджер, специалист, оператор, заказчик.
-    type = роль пользователя.
+    Кастомный пользователь системы:
+    логин/пароль берутся из AbstractUser:
+    - username
+    - password (хранится как хеш)
+    Плюс свои поля: ФИО, телефон, роль.
     """
     ROLE_CHOICES = [
+        ('admin', 'Администратор'),
         ('manager', 'Менеджер'),
         ('specialist', 'Специалист'),
         ('operator', 'Оператор'),
         ('client', 'Заказчик'),
     ]
 
-    user_id = models.AutoField(primary_key=True)  # userID из файла
-    fio = models.CharField(max_length=100)       # fio
-    phone = models.CharField(max_length=20)      # phone
-    login = models.CharField(max_length=50, unique=True)   # login
-    password = models.CharField(max_length=128)            
+    fio = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
 
     def __str__(self):
-        return f'{self.fio} ({self.role})'
-
+        return f'{self.fio} ({self.username}, {self.role})'
+    
 
 class Request(models.Model):
     """
@@ -48,16 +50,16 @@ class Request(models.Model):
 
     # masterID и clientID
     master = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='requests_as_master'
+        related_name='requests_as_master',
     )
     client = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='requests_as_client'
+        related_name='requests_as_client',
     )
 
     def __str__(self):
@@ -65,23 +67,19 @@ class Request(models.Model):
 
 
 class Comment(models.Model):
-    """
-    Комментарий специалиста к заявке.
-    """
-    comment_id = models.AutoField(primary_key=True)  # commentID
-    message = models.TextField()                     # message
+    comment_id = models.AutoField(primary_key=True)
+    message = models.TextField()
 
     master = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='comments'
-    )                                                # masterID
-
+        related_name='comments',
+    )
     request = models.ForeignKey(
         Request,
         on_delete=models.CASCADE,
-        related_name='comments'
-    )                                                # requestID
+        related_name='comments',
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 

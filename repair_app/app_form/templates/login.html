@@ -1,30 +1,391 @@
-
 {% extends 'base.html' %}
-{% block title %}Вход{% endblock %}
+{% block title %}Вход в систему{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow">
-            <div class="card-body p-5">
-                <div class="text-center mb-4">
-                    <i class="fas fa-lock fa-3x text-primary mb-3"></i>
-                    <h2>Вход в систему</h2>
+<style>
+    /* Дополнительные стили для страницы входа */
+    .login-page-container {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        position: relative;
+    }
+
+    .login-form-container {
+        width: 100%;
+        max-width: 420px;
+        z-index: 10;
+        position: relative;
+    }
+
+    .login-card {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(25px);
+        border-radius: 24px;
+        padding: 50px 45px;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(59, 130, 246, 0.8), 
+            transparent);
+        z-index: 1;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 45px;
+    }
+
+    .login-icon {
+        font-size: 3.5em;
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 5px 15px rgba(59, 130, 246, 0.3));
+    }
+
+    .login-title {
+        color: #ffffff;
+        font-size: 2.2em;
+        font-weight: 700;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+    }
+
+    .login-subtitle {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.95em;
+        font-weight: 400;
+    }
+
+    /* Стили полей ввода */
+    .input-group {
+        position: relative;
+        margin-bottom: 25px;
+    }
+
+    .login-input {
+        width: 100%;
+        padding: 18px 25px 18px 55px;
+        font-size: 1em;
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        outline: none;
+        transition: all 0.3s ease;
+        font-weight: 400;
+    }
+
+    .login-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .login-input:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(59, 130, 246, 0.6);
+        box-shadow: 
+            0 0 0 3px rgba(59, 130, 246, 0.15),
+            0 0 20px rgba(59, 130, 246, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 1.1em;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+
+    .login-input:focus + .input-icon {
+        color: #3b82f6;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    /* Стили кнопки */
+    .login-btn {
+        width: 100%;
+        padding: 18px;
+        margin-top: 10px;
+        border-radius: 50px;
+        font-size: 1.1em;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        border: none;
+        color: white;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+    }
+
+    .login-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 
+            0 15px 35px rgba(59, 130, 246, 0.35),
+            inset 0 0 30px rgba(255, 255, 255, 0.1);
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    }
+
+    .login-btn:active {
+        transform: translateY(-1px);
+    }
+
+    /* Стили для футера */
+    .login-footer {
+        text-align: center;
+        margin-top: 35px;
+        padding-top: 25px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .footer-text {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.85em;
+    }
+
+    /* Стили ошибки */
+    .error-message {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fecaca;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        text-align: center;
+        font-size: 0.9em;
+        backdrop-filter: blur(5px);
+        animation: slideIn 0.5s ease;
+    }
+
+    /* Фоновые элементы */
+    .bg-gradient-1 {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        filter: blur(40px);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    /* Уведомление о пароле */
+    .password-hint {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(30, 41, 59, 0.95);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-left: 4px solid #3b82f6;
+        color: #e2e8f0;
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-size: 0.9em;
+        z-index: 1000;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        animation: slideInRight 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
+        max-width: 300px;
+        display: none;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOut {
+        to {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .login-card {
+            padding: 40px 30px;
+        }
+        
+        .login-title {
+            font-size: 1.9em;
+        }
+        
+        .login-input {
+            padding: 16px 20px 16px 50px;
+        }
+    }
+</style>
+
+<div class="login-page-container">
+    <div class="bg-gradient-1"></div>
+    
+    <div class="login-form-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h1 class="login-title">Вход в систему</h1>
+                <p class="login-subtitle">Войдите в свою учетную запись</p>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Неверное имя пользователя или пароль
+                    </div>
+                {% endif %}
+                
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    <input 
+                        type="text" 
+                        name="username" 
+                        class="login-input" 
+                        placeholder="Введите логин" 
+                        required
+                        autofocus
+                        autocomplete="username"
+                    >
                 </div>
                 
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Логин</label>
-                        <input type="text" name="username" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Пароль</label>
-                        <input type="password" name="password" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Войти</button>
-                </form>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input 
+                        type="password" 
+                        name="password" 
+                        class="login-input password-field" 
+                        placeholder="Введите пароль" 
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Войти в систему
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p class="footer-text">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    RepairService © 2024
+                </p>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Уведомление о пароле -->
+<div class="password-hint" id="passwordHint">
+    <i class="fas fa-smile-wink me-2"></i>
+    Если забыли - придется вспомнить :)
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordField = document.querySelector('.password-field');
+        const passwordHint = document.getElementById('passwordHint');
+        const loginCard = document.querySelector('.login-card');
+        
+        // Анимация появления формы
+        loginCard.style.opacity = '0';
+        loginCard.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            loginCard.style.transition = 'all 0.6s ease';
+            loginCard.style.opacity = '1';
+            loginCard.style.transform = 'translateY(0)';
+        }, 200);
+        
+        // Показ уведомления при фокусе на поле пароля
+        passwordField.addEventListener('focus', function() {
+            passwordHint.style.display = 'block';
+            passwordHint.style.animation = 'none';
+            void passwordHint.offsetWidth;
+            passwordHint.style.animation = 'slideInRight 0.5s ease, fadeOut 0.5s ease 2.5s forwards';
+        });
+        
+        // Анимация полей ввода
+        const inputs = document.querySelectorAll('.login-input');
+        const icons = document.querySelectorAll('.input-icon');
+        
+        inputs.forEach((input, index) => {
+            input.style.opacity = '0';
+            input.style.transform = 'translateX(-15px)';
+            
+            setTimeout(() => {
+                input.style.transition = 'all 0.4s ease';
+                input.style.opacity = '1';
+                input.style.transform = 'translateX(0)';
+            }, 400 + (index * 100));
+        });
+        
+        icons.forEach((icon, index) => {
+            icon.style.opacity = '0';
+            
+            setTimeout(() => {
+                icon.style.transition = 'all 0.4s ease';
+                icon.style.opacity = '1';
+            }, 500 + (index * 100));
+        });
+    });
+    
+    // Дополнительный скрипт для уведомления
+    document.querySelector('.password-field').addEventListener('click', function() {
+        const hint = document.getElementById('passwordHint');
+        if (hint.style.display === 'none') {
+            hint.style.display = 'block';
+            hint.style.animation = 'slideInRight 0.5s ease, fadeOut 0.5s ease 2.5s forwards';
+        }
+    });
+</script>
 {% endblock %}

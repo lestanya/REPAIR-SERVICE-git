@@ -1,78 +1,73 @@
 from django.shortcuts import render, redirect
-from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from .models import User as CustomUser, Request, Comment
+from django.contrib import messages
+
+from django.contrib.auth import get_user_model
+from .models import Request, Comment
 from .forms import UserForm, RequestForm, CommentForm
 
+User = get_user_model()
 
 
 def index(request):
     return render(request, 'index.html')
 
+
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
+        username = request.POST['username']      # username из User
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            messages.success(request, f'Добро пожаловать, {user.username}!')
+            messages.success(request, f'Добро пожаловать, {user.fio}!')
             return redirect('dashboard')
         messages.error(request, 'Неверный логин или пароль')
     return render(request, 'login.html')
+
 
 def logout_view(request):
     logout(request)
     messages.success(request, 'Вы вышли из системы')
     return redirect('index')
 
+
 @login_required
 def profile(request):
-    # Получаем роль пользователя из CustomUser
-    try:
-        custom_user = CustomUser.objects.get(login=request.user.username)
-        user_role = custom_user.role
-        user_phone = custom_user.phone
-    except:
-        user_role = 'Неизвестно'
-        user_phone = 'Не указан'
-    
+    user = request.user
     context = {
-        'user_role': user_role,
-        'user_phone': user_phone,
+        'user_role': user.role,
+        'user_phone': user.phone,
+        'user_fio': user.fio,
     }
     return render(request, 'profile.html', context)
 
+
 @login_required
 def dashboard(request):
-    # ФИЛЬТРАЦИЯ ПО РОЛЯМ!
-    custom_user = CustomUser.objects.get(login=request.user.username)
-    role = custom_user.role
-    
+    # Фильтрация заявок по роли текущего пользователя
+    user = request.user
+    role = user.role
+
     if role == 'specialist':
-        requests = Request.objects.filter(master=custom_user)
+        requests_qs = Request.objects.filter(master=user)
     elif role == 'client':
-        requests = Request.objects.filter(client=custom_user)
-    else:  # manager, operator
-        requests = Request.objects.all()
+        requests_qs = Request.objects.filter(client=user)
+    else:  # admin, manager, operator
+        requests_qs = Request.objects.all()
 
-
-
-def dashboard(request):
     users = User.objects.all()
-    requests = Request.objects.all()
     comments = Comment.objects.all()
 
-    # Инициализируем ВСЕ формы в начале
+    # Инициализируем формы
     user_form = UserForm()
     request_form = RequestForm()
     comment_form = CommentForm()
 
     if request.method == 'POST':
         if 'user_submit' in request.POST:
-            user_form = UserForm(request.POST)  # Пересоздаем только эту
+            user_form = UserForm(request.POST)
             if user_form.is_valid():
                 user_form.save()
                 messages.success(request, 'Пользователь добавлен!')
@@ -94,11 +89,10 @@ def dashboard(request):
 
     context = {
         'users': users,
-        'requests': requests,
+        'requests': requests_qs,
         'comments': comments,
         'user_form': user_form,
         'request_form': request_form,
         'comment_form': comment_form,
-        'messages': messages.get_messages(request),
     }
     return render(request, 'dashboard.html', context)
