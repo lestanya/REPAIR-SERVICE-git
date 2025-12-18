@@ -1,0 +1,887 @@
+{% extends 'base.html' %}
+{% block title %}QR-код для оценки качества{% endblock %}
+
+{% block content %}
+<style>
+    .qr-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Заголовок */
+    .qr-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .qr-title {
+        font-size: 2.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--deep-blue), var(--electric-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+        letter-spacing: 1px;
+    }
+
+    .qr-subtitle {
+        color: var(--card-color);
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto;
+        opacity: 0.8;
+    }
+
+    /* Основная карточка */
+    .qr-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(25px);
+        border-radius: 25px;
+        padding: 3rem;
+        border: 1px solid var(--border-color);
+        box-shadow: 
+            0 25px 50px var(--shadow-color),
+            0 0 30px rgba(0, 153, 255, 0.1);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .qr-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 
+            0 35px 60px var(--shadow-color),
+            0 0 40px rgba(0, 153, 255, 0.15);
+    }
+
+    /* Сетка контента */
+    .qr-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    @media (max-width: 992px) {
+        .qr-content {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Левая часть - QR код */
+    .qr-code-section {
+        text-align: center;
+    }
+
+    .qr-frame {
+        position: relative;
+        display: inline-block;
+        padding: 25px;
+        background: linear-gradient(135deg, 
+            rgba(0, 102, 255, 0.1),
+            rgba(0, 153, 255, 0.05));
+        border-radius: 20px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        margin-bottom: 2rem;
+        animation: qr-glow 3s infinite alternate;
+    }
+
+    .qr-frame::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, 
+            var(--deep-blue),
+            var(--electric-blue),
+            var(--neon-blue),
+            var(--electric-blue));
+        border-radius: 22px;
+        z-index: -1;
+        animation: qr-border 4s linear infinite;
+    }
+
+    #qrImage {
+        width: 280px;
+        height: 280px;
+        border-radius: 10px;
+        background: white;
+        padding: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-theme #qrImage {
+        background: #1a1a2e;
+    }
+
+    .qr-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .qr-btn {
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-width: 160px;
+    }
+
+    .qr-btn-primary {
+        background: linear-gradient(135deg, var(--deep-blue), var(--electric-blue));
+        color: white;
+        box-shadow: 0 8px 25px rgba(0, 102, 255, 0.3);
+    }
+
+    .qr-btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 102, 255, 0.4);
+        background: linear-gradient(135deg, var(--electric-blue), var(--deep-blue));
+    }
+
+    .qr-btn-secondary {
+        background: rgba(0, 102, 255, 0.1);
+        color: var(--card-color);
+        border: 1px solid var(--border-color);
+    }
+
+    .qr-btn-secondary:hover {
+        background: rgba(0, 102, 255, 0.2);
+        transform: translateY(-3px);
+    }
+
+    /* Правая часть - информация */
+    .qr-info-section {
+        padding-left: 2rem;
+    }
+
+    @media (max-width: 992px) {
+        .qr-info-section {
+            padding-left: 0;
+            padding-top: 2rem;
+        }
+    }
+
+    .qr-info-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--card-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .qr-info-list {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+
+    .qr-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(0, 102, 255, 0.05);
+        border-radius: 12px;
+        border-left: 4px solid var(--electric-blue);
+        transition: all 0.3s ease;
+    }
+
+    .qr-info-item:hover {
+        background: rgba(0, 102, 255, 0.1);
+        transform: translateX(5px);
+    }
+
+    .qr-info-icon {
+        font-size: 1.5rem;
+        color: var(--electric-blue);
+        margin-top: 0.2rem;
+    }
+
+    .qr-info-text h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--card-color);
+    }
+
+    .qr-info-text p {
+        color: var(--card-color);
+        opacity: 0.8;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    /* Ссылка на опрос */
+    .qr-link-box {
+        background: linear-gradient(135deg, 
+            rgba(0, 102, 255, 0.08),
+            rgba(0, 153, 255, 0.05));
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        margin-top: 2rem;
+    }
+
+    .qr-link-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--card-color);
+        opacity: 0.7;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .qr-link {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        word-break: break-all;
+        font-size: 0.95rem;
+        color: var(--card-color);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    body.dark-theme .qr-link {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .qr-link:hover {
+        background: rgba(0, 102, 255, 0.1);
+    }
+
+    .qr-link-icon {
+        color: var(--electric-blue);
+        font-size: 1.2rem;
+    }
+
+    /* Инструкция по использованию */
+    .qr-instructions {
+        margin-top: 3rem;
+    }
+
+    .instructions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .instruction-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .instruction-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px var(--shadow-color);
+        border-color: var(--electric-blue);
+    }
+
+    .instruction-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--deep-blue), var(--electric-blue));
+        color: white;
+        border-radius: 50%;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .instruction-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        color: var(--card-color);
+    }
+
+    .instruction-desc {
+        color: var(--card-color);
+        opacity: 0.8;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Анимации */
+    @keyframes qr-glow {
+        0% {
+            box-shadow: 
+                0 0 20px rgba(0, 153, 255, 0.2),
+                inset 0 0 20px rgba(0, 153, 255, 0.1);
+        }
+        100% {
+            box-shadow: 
+                0 0 40px rgba(0, 153, 255, 0.3),
+                inset 0 0 30px rgba(0, 153, 255, 0.15);
+        }
+    }
+
+    @keyframes qr-border {
+        0% {
+            filter: hue-rotate(0deg);
+        }
+        100% {
+            filter: hue-rotate(360deg);
+        }
+    }
+
+    /* Статистика */
+    .qr-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1.5rem;
+        background: var(--card-bg);
+        border-radius: 15px;
+        border: 1px solid var(--border-color);
+        min-width: 150px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-5px);
+        border-color: var(--electric-blue);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--deep-blue), var(--electric-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--card-color);
+        opacity: 0.8;
+        margin-top: 0.5rem;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .qr-container {
+            padding: 1rem;
+        }
+        
+        .qr-title {
+            font-size: 2rem;
+        }
+        
+        .qr-card {
+            padding: 2rem 1.5rem;
+        }
+        
+        .qr-actions {
+            flex-direction: column;
+        }
+        
+        .qr-btn {
+            width: 100%;
+        }
+        
+        #qrImage {
+            width: 220px;
+            height: 220px;
+        }
+        
+        .qr-stats {
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            min-width: 120px;
+            padding: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="qr-container">
+    <!-- Заголовок -->
+    <div class="qr-header">
+        <h1 class="qr-title">
+            <i class="fas fa-qrcode"></i> QR-код для оценки качества
+        </h1>
+        <p class="qr-subtitle">
+            Сгенерируйте QR-код для сбора отзывов о качестве выполненных работ. 
+            Клиенты смогут легко оценить сервис, просто отсканировав код.
+        </p>
+    </div>
+
+    <!-- Основная карточка -->
+    <div class="qr-card">
+        <div class="qr-content">
+            <!-- Левая часть - QR код -->
+            <div class="qr-code-section">
+                <div class="qr-frame">
+                    <img id="qrImage" src="" alt="QR Code" />
+                </div>
+                
+                <div class="qr-actions">
+                    <button class="qr-btn qr-btn-primary" onclick="generateQR()">
+                        <i class="fas fa-sync-alt"></i>
+                        Сгенерировать QR
+                    </button>
+                    <button class="qr-btn qr-btn-secondary" onclick="downloadQR()">
+                        <i class="fas fa-download"></i>
+                        Скачать QR
+                    </button>
+                </div>
+                
+                <div class="qr-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="scansCount">0</div>
+                        <div class="stat-label">Сканирований</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="responsesCount">0</div>
+                        <div class="stat-label">Отзывов</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="ratingValue">4.8</div>
+                        <div class="stat-label">Средняя оценка</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая часть - информация -->
+            <div class="qr-info-section">
+                <h2 class="qr-info-title">
+                    <i class="fas fa-star"></i>
+                    Оценка качества работ
+                </h2>
+                
+                <ul class="qr-info-list">
+                    <li class="qr-info-item">
+                        <div class="qr-info-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="qr-info-text">
+                            <h4>Простое сканирование</h4>
+                            <p>Клиент сканирует QR-код с помощью камеры смартфона и сразу попадает на форму оценки</p>
+                        </div>
+                    </li>
+                    
+                    <li class="qr-info-item">
+                        <div class="qr-info-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="qr-info-text">
+                            <h4>Аналитика в реальном времени</h4>
+                            <p>Отслеживайте статистику отзывов, средние оценки и количество заполненных форм</p>
+                        </div>
+                    </li>
+                    
+                    <li class="qr-info-item">
+                        <div class="qr-info-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="qr-info-text">
+                            <h4>Безопасно и анонимно</h4>
+                            <p>Данные собираются анонимно через Google Forms, соответствуя требованиям конфиденциальности</p>
+                        </div>
+                    </li>
+                    
+                    <li class="qr-info-item">
+                        <div class="qr-info-icon">
+                            <i class="fas fa-print"></i>
+                        </div>
+                        <div class="qr-info-text">
+                            <h4>Печать и распространение</h4>
+                            <p>Распечатайте QR-код и разместите на бланках, визитках или в ремонтной зоне</p>
+                        </div>
+                    </li>
+                </ul>
+                
+                <div class="qr-link-box">
+                    <div class="qr-link-label">
+                        <i class="fas fa-link"></i>
+                        Ссылка на форму опроса:
+                    </div>
+                    <div class="qr-link" id="surveyLink">
+                        <i class="fas fa-external-link-alt qr-link-icon"></i>
+                        <span>https://docs.google.com/forms/d/e/1FAIpQLSdhZcExx6LSIXxk0ub55mSu-WIh23WYdGG9HY5EZhLDo7P8eA/viewform?usp=sf_link</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Инструкция по использованию -->
+    <div class="qr-instructions">
+        <h2 class="qr-info-title">
+            <i class="fas fa-graduation-cap"></i>
+            Как использовать QR-код?
+        </h2>
+        
+        <div class="instructions-grid">
+            <div class="instruction-card">
+                <div class="instruction-number">1</div>
+                <h3 class="instruction-title">Сгенерируйте код</h3>
+                <p class="instruction-desc">Нажмите кнопку "Сгенерировать QR" для создания уникального кода</p>
+            </div>
+            
+            <div class="instruction-card">
+                <div class="instruction-number">2</div>
+                <h3 class="instruction-title">Скачайте и распечатайте</h3>
+                <p class="instruction-desc">Загрузите изображение и распечатайте его в нужном размере</p>
+            </div>
+            
+            <div class="instruction-card">
+                <div class="instruction-number">3</div>
+                <h3 class="instruction-title">Разместите</h3>
+                <p class="instruction-desc">Поместите QR-код на документы, визитки или в зоне приема клиентов</p>
+            </div>
+            
+            <div class="instruction-card">
+                <div class="instruction-number">4</div>
+                <h3 class="instruction-title">Собирайте отзывы</h3>
+                <p class="instruction-desc">Клиенты сканируют код и заполняют форму оценки качества</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подключаем библиотеку для генерации QR-кодов -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация при загрузке
+        generateQR();
+        
+        // Плавное появление элементов
+        const elements = document.querySelectorAll('.qr-card, .instruction-card, .stat-item');
+        elements.forEach((element, index) => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                element.style.transition = 'all 0.6s ease';
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, 100 + (index * 100));
+        });
+        
+        // Анимация для статистики
+        animateCounter('scansCount', 127);
+        animateCounter('responsesCount', 89);
+        animateCounter('ratingValue', 4.8, 1);
+    });
+    
+    // Функция для генерации QR-кода
+    function generateQR() {
+        const surveyUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdhZcExx6LSIXxk0ub55mSu-WIh23WYdGG9HY5EZhLDo7P8eA/viewform?usp=sf_link';
+        
+        // Создаем QR-код
+        const qr = qrcode(0, 'M');
+        qr.addData(surveyUrl);
+        qr.make();
+        
+        // Создаем изображение QR-кода
+        const qrImage = document.getElementById('qrImage');
+        const qrSize = 280;
+        const cellSize = 4;
+        
+        // Создаем canvas для красивого QR-кода
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = qrSize;
+        canvas.height = qrSize;
+        
+        // Цвета в зависимости от темы
+        const isDarkTheme = document.body.classList.contains('dark-theme');
+        const fgColor = isDarkTheme ? '#00f3ff' : '#0066ff';
+        const bgColor = isDarkTheme ? '#1a1a2e' : '#ffffff';
+        
+        // Заливаем фон
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, qrSize, qrSize);
+        
+        // Рисуем QR-код
+        const qrCells = qr.getModuleCount();
+        const cellPixelSize = qrSize / qrCells;
+        
+        // Основные модули
+        ctx.fillStyle = fgColor;
+        for (let row = 0; row < qrCells; row++) {
+            for (let col = 0; col < qrCells; col++) {
+                if (qr.isDark(row, col)) {
+                    // Закругленные углы для модулей
+                    const x = col * cellPixelSize;
+                    const y = row * cellPixelSize;
+                    const radius = cellPixelSize * 0.2;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x + radius, y);
+                    ctx.lineTo(x + cellPixelSize - radius, y);
+                    ctx.quadraticCurveTo(x + cellPixelSize, y, x + cellPixelSize, y + radius);
+                    ctx.lineTo(x + cellPixelSize, y + cellPixelSize - radius);
+                    ctx.quadraticCurveTo(x + cellPixelSize, y + cellPixelSize, x + cellPixelSize - radius, y + cellPixelSize);
+                    ctx.lineTo(x + radius, y + cellPixelSize);
+                    ctx.quadraticCurveTo(x, y + cellPixelSize, x, y + cellPixelSize - radius);
+                    ctx.lineTo(x, y + radius);
+                    ctx.quadraticCurveTo(x, y, x + radius, y);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+        }
+        
+        // Добавляем логотип в центре
+        drawLogo(ctx, qrSize, isDarkTheme);
+        
+        // Конвертируем canvas в data URL и устанавливаем как src
+        qrImage.src = canvas.toDataURL('image/png');
+        
+        // Анимация генерации
+        qrImage.style.transform = 'scale(0.8)';
+        qrImage.style.opacity = '0.5';
+        
+        setTimeout(() => {
+            qrImage.style.transition = 'all 0.5s ease';
+            qrImage.style.transform = 'scale(1)';
+            qrImage.style.opacity = '1';
+        }, 100);
+        
+        // Увеличиваем счетчик сканирований
+        updateScanCounter();
+    }
+    
+    // Функция для отрисовки логотипа в центре QR-кода
+    function drawLogo(ctx, qrSize, isDarkTheme) {
+        const center = qrSize / 2;
+        const logoSize = qrSize * 0.15;
+        
+        // Рисуем круглый фон для логотипа
+        ctx.fillStyle = isDarkTheme ? '#0a0a2a' : '#f0f8ff';
+        ctx.beginPath();
+        ctx.arc(center, center, logoSize, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Рисуем бордюр
+        ctx.strokeStyle = isDarkTheme ? '#00f3ff' : '#0066ff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Рисуем иконку звезды (для оценки качества)
+        ctx.fillStyle = isDarkTheme ? '#00f3ff' : '#0066ff';
+        ctx.font = `${logoSize * 0.7}px FontAwesome`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('★', center, center);
+    }
+    
+    // Функция для скачивания QR-кода
+    function downloadQR() {
+        const qrImage = document.getElementById('qrImage');
+        const link = document.createElement('a');
+        
+        // Создаем уникальное имя файла
+        const timestamp = new Date().toISOString().slice(0, 10);
+        const filename = `quality-survey-qr-${timestamp}.png`;
+        
+        link.download = filename;
+        link.href = qrImage.src;
+        link.click();
+        
+        // Показываем уведомление о скачивании
+        showNotification('QR-код успешно скачан!', 'success');
+    }
+    
+    // Функция для анимации счетчиков
+    function animateCounter(elementId, targetValue, decimals = 0) {
+        const element = document.getElementById(elementId);
+        let current = 0;
+        const increment = targetValue / 60; // 60 кадров за 2 секунды
+        const duration = 2000; // 2 секунды
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= targetValue) {
+                current = targetValue;
+                clearInterval(timer);
+            }
+            
+            if (decimals > 0) {
+                element.textContent = current.toFixed(decimals);
+            } else {
+                element.textContent = Math.round(current);
+            }
+        }, duration / 60);
+    }
+    
+    // Функция для обновления счетчика сканирований
+    function updateScanCounter() {
+        const scansElement = document.getElementById('scansCount');
+        let currentScans = parseInt(scansElement.textContent) || 0;
+        
+        // Увеличиваем на случайное число для демонстрации
+        const newScans = currentScans + Math.floor(Math.random() * 3) + 1;
+        
+        // Анимируем изменение
+        scansElement.style.transform = 'scale(1.2)';
+        scansElement.style.color = '#00ff00';
+        
+        setTimeout(() => {
+            scansElement.textContent = newScans;
+            scansElement.style.transition = 'all 0.3s ease';
+            scansElement.style.transform = 'scale(1)';
+            scansElement.style.color = '';
+        }, 300);
+        
+        // Обновляем счетчик отзывов
+        updateResponsesCounter();
+    }
+    
+    // Функция для обновления счетчика отзывов
+    function updateResponsesCounter() {
+        const responsesElement = document.getElementById('responsesCount');
+        let currentResponses = parseInt(responsesElement.textContent) || 0;
+        
+        // 70% от сканирований становятся отзывами
+        const newResponses = Math.floor(parseInt(document.getElementById('scansCount').textContent) * 0.7);
+        
+        if (newResponses > currentResponses) {
+            responsesElement.style.transform = 'scale(1.2)';
+            responsesElement.style.color = '#ffcc00';
+            
+            setTimeout(() => {
+                responsesElement.textContent = newResponses;
+                responsesElement.style.transition = 'all 0.3s ease';
+                responsesElement.style.transform = 'scale(1)';
+                responsesElement.style.color = '';
+            }, 300);
+        }
+        
+        // Обновляем рейтинг
+        updateRating();
+    }
+    
+    // Функция для обновления рейтинга
+    function updateRating() {
+        const ratingElement = document.getElementById('ratingValue');
+        let currentRating = parseFloat(ratingElement.textContent) || 4.8;
+        
+        // Немного изменяем рейтинг в пределах ±0.1
+        const change = (Math.random() * 0.2) - 0.1;
+        let newRating = Math.max(4.5, Math.min(5.0, currentRating + change));
+        
+        ratingElement.style.transform = 'scale(1.1)';
+        
+        setTimeout(() => {
+            ratingElement.textContent = newRating.toFixed(1);
+            ratingElement.style.transition = 'all 0.3s ease';
+            ratingElement.style.transform = 'scale(1)';
+        }, 200);
+    }
+    
+    // Функция для показа уведомлений
+    function showNotification(message, type = 'info') {
+        // Создаем элемент уведомления
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease;
+        `;
+        
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                <span>${message}</span>
+            </div>
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Автоматически удаляем через 5 секунд
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 5000);
+    }
+    
+    // Добавляем стили для анимаций уведомлений
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Копирование ссылки при клике
+    document.getElementById('surveyLink').addEventListener('click', function() {
+        const text = 'https://docs.google.com/forms/d/e/1FAIpQLSdhZcExx6LSIXxk0ub55mSu-WIh23WYdGG9HY5EZhLDo7P8eA/viewform?usp=sf_link';
+        navigator.clipboard.writeText(text)
+            .then(() => showNotification('Ссылка скопирована в буфер обмена!', 'success'))
+            .catch(() => showNotification('Не удалось скопировать ссылку', 'warning'));
+    });
+</script>
+{% endblock %}

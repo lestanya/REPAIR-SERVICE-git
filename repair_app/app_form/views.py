@@ -96,3 +96,8 @@ def dashboard(request):
         'comment_form': comment_form,
     }
     return render(request, 'dashboard.html', context)
+
+
+def qr_survey_page(request):
+    """Страница для генерации QR-кода оценки качества"""
+    return render(request, 'qr_code.html')
