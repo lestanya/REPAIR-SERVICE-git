@@ -26,4 +26,5 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('profile/', views.profile, name='profile'),
     path('qr-survey/', views.qr_survey_page, name='qr_survey'),
+    path('stats/', views.stats_view, name='stats'),
 ]

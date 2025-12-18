@@ -44,7 +44,10 @@ class Request(models.Model):
     climate_tech_type = models.CharField(max_length=50)   # climateTechType
     climate_tech_model = models.CharField(max_length=100) # climateTechModel
     problem_description = models.TextField()              # problemDescryption
-    request_status = models.CharField(max_length=20)      # requestStatus (можно привязать к STATUS_CHOICES)
+    request_status = models.CharField(
+    max_length=20,
+    choices=STATUS_CHOICES,   # ← вот это добавляет выпадающий список
+    )
     completion_date = models.DateField(null=True, blank=True)  # completionDate
     repair_parts = models.TextField(blank=True)           # repairParts (описание заказанных деталей)
 

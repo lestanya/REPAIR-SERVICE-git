@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Count
 
 from django.contrib.auth import get_user_model
 from .models import Request, Comment
@@ -101,3 +102,34 @@ def dashboard(request):
 def qr_survey_page(request):
     """Страница для генерации QR-кода оценки качества"""
     return render(request, 'qr_code.html')
+
+
+def stats_view(request):
+    # Выполненные заявки
+    completed_qs = Request.objects.filter(request_status='completed')
+    completed_count = completed_qs.count()
+
+    # Среднее время выполнения (completion_date - start_date) в часах
+    durations = []
+    for r in completed_qs.exclude(completion_date__isnull=True):
+        delta = r.completion_date - r.start_date
+        durations.append(delta.total_seconds() / 3600)
+
+    avg_hours = 0
+    if durations:
+        avg_hours = sum(durations) / len(durations)
+
+    # Статистика по типам неисправностей
+    type_stats = (
+        Request.objects
+        .values('climate_tech_type')
+        .annotate(count=Count('request_id'))   # ← тут главное изменение
+        .order_by('-count')
+    )
+
+    context = {
+        'completed_count': completed_count,
+        'avg_hours': avg_hours,
+        'type_stats': type_stats,
+    }
+    return render(request, 'stats.html', context)

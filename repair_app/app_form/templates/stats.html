@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% block title %}RepairControl | Статистика{% endblock %}
+
+{% block content %}
+<style>
+    /* Копия ключевых стилей из index, чтобы сохранить стиль */
+    .main-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+    }
+
+    .hero-section {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .main-card {
+        background: linear-gradient(135deg,
+            rgba(15, 25, 45, 0.8) 0%,
+            rgba(10, 20, 40, 0.6) 100%);
+        backdrop-filter: blur(25px);
+        border-radius: 30px;
+        padding: 3rem;
+        border: 1px solid rgba(0, 243, 255, 0.2);
+        box-shadow:
+            0 30px 60px -12px rgba(0, 0, 0, 0.5),
+            0 0 50px rgba(0, 243, 255, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+
+    .main-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg,
+            transparent,
+            rgba(0, 243, 255, 0.8),
+            rgba(0, 102, 255, 0.8),
+            rgba(0, 243, 255, 0.8),
+            transparent);
+    }
+
+    .system-title {
+        font-size: 2.4rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #00f3ff 0%, #0066ff 50%, #00f3ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+        text-align: center;
+    }
+
+    .stats-section {
+        margin-top: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        background: rgba(20, 30, 50, 0.5);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(0, 153, 255, 0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        border-color: rgba(0, 243, 255, 0.3);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 243, 255, 0.15);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #00f3ff, #0066ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .types-card {
+        margin-top: 2rem;
+        background: rgba(20, 30, 50, 0.5);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(0, 153, 255, 0.1);
+    }
+
+    .types-title {
+        font-size: 1.4rem;
+        color: #ffffff;
+        margin-bottom: 1rem;
+    }
+
+    .types-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #e5e7eb;
+    }
+
+    .types-table th,
+    .types-table td {
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .types-table th {
+        text-align: left;
+        color: #9ca3af;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="main-container">
+    <div class="hero-section">
+        <div class="main-card">
+            <h1 class="system-title">Статистика системы RepairControl</h1>
+
+            {% if user.is_authenticated %}
+            <!-- Блок ключевых показателей -->
+            <div class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-number" id="completedCount">0</div>
+                    <div class="stat-label">Выполненных заявок</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" id="avgTime">{{ avg_hours|floatformat:1 }}ч</div>
+                    <div class="stat-label">Среднее время выполнения</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" id="typesCount">{{ type_stats|length }}</div>
+                    <div class="stat-label">Типов неисправностей</div>
+                </div>
+            </div>
+
+            <!-- Таблица по типам неисправностей -->
+            <div class="types-card">
+                <h3 class="types-title">Статистика по типам неисправностей</h3>
+                <table class="types-table">
+                    <thead>
+                        <tr>
+                            <th>Тип оборудования</th>
+                            <th>Количество заявок</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in type_stats %}
+                        <tr>
+                            <td>{{ item.climate_tech_type }}</td>
+                            <td>{{ item.count }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-muted">Нет данных для отображения</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Круговая диаграмма по типам неисправностей -->
+            <div class="types-card" style="margin-top: 1.5rem;">
+                <h3 class="types-title">Диаграмма типов неисправностей</h3>
+                <canvas id="typesChart" height="120"></canvas>
+            </div>
+
+            {% else %}
+            <p class="text-center text-light mt-3">
+                Для просмотра статистики необходимо авторизоваться.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Анимация появления основной карточки (как на главной)
+        const mainCard = document.querySelector('.main-card');
+        mainCard.style.opacity = '0';
+        mainCard.style.transform = 'translateY(40px) scale(0.95)';
+
+        setTimeout(() => {
+            mainCard.style.transition = 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            mainCard.style.opacity = '1';
+            mainCard.style.transform = 'translateY(0) scale(1)';
+        }, 300);
+
+        // Пульсация свечения карты
+        setInterval(() => {
+            mainCard.style.animation = 'pulse-glow 3s ease-in-out';
+            setTimeout(() => {
+                mainCard.style.animation = '';
+            }, 3000);
+        }, 8000);
+
+        // Анимация чисел статистики (как на главной, но с реальными данными)
+        const completedTarget = {{ completed_count }};
+        const avgTimeEl = document.getElementById('avgTime');
+        const avgTimeVal = {{ avg_hours|floatformat:1 }};  // без суффикса
+        const completedEl = document.getElementById('completedCount');
+
+        function animateNumber(el, target, suffix = '') {
+            let current = 0;
+            const increment = (target || 0) / 60;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                el.textContent = suffix === 'ч'
+                    ? current.toFixed(1) + suffix
+                    : Math.round(current) + suffix;
+            }, 30);
+        }
+
+        animateNumber(completedEl, completedTarget, '');
+        animateNumber(avgTimeEl, avgTimeVal, 'ч');
+
+        // Круговая диаграмма по типам неисправностей
+        const labels = [
+            {% for item in type_stats %}
+                "{{ item.climate_tech_type }}",
+            {% endfor %}
+        ];
+        const values = [
+            {% for item in type_stats %}
+                {{ item.count }},
+            {% endfor %}
+        ];
+
+        if (labels.length && document.getElementById('typesChart')) {
+            const ctx = document.getElementById('typesChart').getContext('2d');
+
+            const colors = [
+                'rgba(0, 243, 255, 0.7)',
+                'rgba(0, 102, 255, 0.7)',
+                'rgba(56, 189, 248, 0.7)',
+                'rgba(129, 140, 248, 0.7)',
+                'rgba(45, 212, 191, 0.7)',
+                'rgba(248, 113, 113, 0.7)',
+            ];
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderColor: 'rgba(15, 23, 42, 1)',
+                        borderWidth: 2,
+                        hoverOffset: 6,
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e5e7eb',
+                                padding: 16,
+                            }
+                        }
+                    },
+                    cutout: '55%',
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+
