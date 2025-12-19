@@ -3,13 +3,143 @@
 
 {% block content %}
 <style>
+    /* ✅ СТИЛИ ФОРМЫ ИЗ DASHBOARD */
+    .form-section {
+        background: linear-gradient(135deg, 
+            rgba(15, 25, 45, 0.8) 0%, 
+            rgba(10, 20, 40, 0.6) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        padding: 2.5rem;
+        border: 1px solid rgba(0, 243, 255, 0.2);
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(0, 243, 255, 0.8), 
+            transparent);
+    }
+
+    .form-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0, 153, 255, 0.2);
+    }
+
+    .form-icon {
+        font-size: 2.2rem;
+        color: #00f3ff;
+        filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.3));
+    }
+
+    .form-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0;
+    }
+
+    .form-group {
+        margin-bottom: 1.8rem;
+        position: relative;
+    }
+
+    .form-group label {
+        display: block;
+        color: #80d4ff;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        background: rgba(25, 35, 55, 0.6);
+        border: 1px solid rgba(0, 153, 255, 0.3);
+        border-radius: 12px;
+        color: #ffffff;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        background: rgba(35, 45, 70, 0.8);
+        border-color: rgba(0, 243, 255, 0.6);
+        outline: none;
+        box-shadow: 
+            0 0 0 3px rgba(0, 243, 255, 0.15),
+            0 0 20px rgba(0, 243, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, 
+            rgba(0, 102, 255, 0.3) 0%, 
+            rgba(0, 243, 255, 0.2) 100%);
+        border: 2px solid transparent;
+        border-image: linear-gradient(135deg, #0066ff, #00f3ff) 1;
+        color: #ffffff;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 
+            0 8px 25px rgba(0, 102, 255, 0.3),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .form-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 
+            0 15px 35px rgba(0, 102, 255, 0.5),
+            0 0 40px rgba(0, 243, 255, 0.3);
+        background: linear-gradient(135deg, 
+            rgba(0, 243, 255, 0.3) 0%, 
+            rgba(0, 102, 255, 0.2) 100%);
+        color: #00f3ff;
+    }
+
+    /* ✅ ВСЕ СТИЛИ ПРОФИЛЯ */
     .profile-container {
         padding: 2rem;
         max-width: 1400px;
         margin: 0 auto;
     }
 
-    /* Профиль пользователя */
     .profile-card {
         background: linear-gradient(135deg, 
             rgba(15, 25, 45, 0.7) 0%, 
@@ -152,7 +282,6 @@
         font-weight: 600;
     }
 
-    /* Секция заявок */
     .requests-section {
         margin-top: 3rem;
     }
@@ -242,29 +371,10 @@
         letter-spacing: 1px;
     }
 
-    .status-new {
-        background: rgba(0, 255, 136, 0.15);
-        color: #80ffd4;
-        border: 1px solid rgba(0, 255, 136, 0.3);
-    }
-
-    .status-progress {
-        background: rgba(255, 204, 0, 0.15);
-        color: #fff5b3;
-        border: 1px solid rgba(255, 204, 0, 0.3);
-    }
-
-    .status-ready {
-        background: rgba(0, 153, 255, 0.15);
-        color: #80d4ff;
-        border: 1px solid rgba(0, 153, 255, 0.3);
-    }
-
-    .status-completed {
-        background: rgba(102, 0, 255, 0.15);
-        color: #ccb3ff;
-        border: 1px solid rgba(102, 0, 255, 0.3);
-    }
+    .status-new { background: rgba(0, 255, 136, 0.15); color: #80ffd4; border: 1px solid rgba(0, 255, 136, 0.3); }
+    .status-progress { background: rgba(255, 204, 0, 0.15); color: #fff5b3; border: 1px solid rgba(255, 204, 0, 0.3); }
+    .status-ready { background: rgba(0, 153, 255, 0.15); color: #80d4ff; border: 1px solid rgba(0, 153, 255, 0.3); }
+    .status-completed { background: rgba(102, 0, 255, 0.15); color: #ccb3ff; border: 1px solid rgba(102, 0, 255, 0.3); }
 
     .request-info {
         margin: 1.2rem 0;
@@ -354,7 +464,7 @@
         font-size: 1.2rem;
     }
 
-    /* Анимации */
+    /* АНИМАЦИИ */
     @keyframes rotate-border {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
@@ -370,76 +480,64 @@
         50% { transform: translateY(-10px); }
     }
 
-    /* Адаптивность */
+    /* АДАПТИВНОСТЬ */
     @media (max-width: 768px) {
-        .profile-container {
-            padding: 1rem;
-        }
-        
-        .profile-card {
-            padding: 2rem 1.5rem;
-        }
-        
-        .profile-avatar {
-            width: 140px;
-            height: 140px;
-        }
-        
-        .profile-icon {
-            font-size: 3.5rem;
-        }
-        
-        .username {
-            font-size: 2.2rem;
-        }
-        
-        .user-info-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .requests-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .section-header {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
-        }
-        
-        .request-card {
-            padding: 1.5rem;
-        }
+        .profile-container { padding: 1rem; }
+        .profile-card { padding: 2rem 1.5rem; }
+        .profile-avatar { width: 140px; height: 140px; }
+        .profile-icon { font-size: 3.5rem; }
+        .username { font-size: 2.2rem; }
+        .user-info-grid,
+        .requests-grid { grid-template-columns: 1fr; }
+        .section-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
+        .request-card { padding: 1.5rem; }
     }
 
     @media (max-width: 480px) {
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-        }
-        
-        .profile-icon {
-            font-size: 3rem;
-        }
-        
-        .username {
-            font-size: 1.8rem;
-        }
-        
-        .request-footer {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
-        }
-        
-        .request-actions {
-            width: 100%;
-            justify-content: flex-start;
-        }
+        .profile-avatar { width: 120px; height: 120px; }
+        .profile-icon { font-size: 3rem; }
+        .username { font-size: 1.8rem; }
+        .request-footer { flex-direction: column; gap: 1rem; align-items: flex-start; }
+        .request-actions { width: 100%; justify-content: flex-start; }
     }
 </style>
 
 <div class="profile-container">
+    <!-- ✅ ФОРМА СОЗДАНИЯ ЗАЯВКИ ТОЛЬКО ДЛЯ КЛИЕНТА -->
+    {% if user.role == 'client' and request_form %}
+    <div class="form-section">
+        <div class="form-header">
+            <div class="form-icon"><i class="fas fa-plus-circle"></i></div>
+            <h3 class="form-title">Создать новую заявку</h3>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            {% for field in request_form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    <i class="fas fa-{% if field.name == 'climate_tech_type' %}snowflake 
+                        {% elif field.name == 'climate_tech_model' %}tag 
+                        {% elif field.name == 'problem_description' %}exclamation-triangle 
+                        {% elif field.name == 'start_date' %}calendar-alt 
+                        {% else %}cog {% endif %}me-1"></i>
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: #ff6b6b; font-size: 0.9rem; margin-top: 0.5rem;">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" name="create_request" class="form-btn">
+                <i class="fas fa-paper-plane me-2"></i> Отправить заявку
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
     <!-- Профиль пользователя -->
     <div class="profile-card">
         <div class="profile-header">
@@ -577,78 +675,40 @@
                 <i class="far fa-clipboard"></i>
             </div>
             <h3 class="no-requests-text">
-                Заявок пока нет. Создайте первую заявку!
+                Заявок пока нет. {% if user.role == 'client' %}Создайте первую!{% else %}Обратитесь к администратору{% endif %}
             </h3>
-            <button class="btn-primary mt-3" style="padding: 1rem 2rem;">
-                <i class="fas fa-plus-circle me-2"></i>Создать заявку
-            </button>
         </div>
         {% endif %}
     </div>
 </div>
 
+<!-- JavaScript анимации -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Анимация аватара
-        const avatar = document.querySelector('.profile-avatar');
-        avatar.style.animation = 'float 6s ease-in-out infinite';
-        
-        // Анимация появления карточек
-        const cards = document.querySelectorAll('.info-card, .request-card');
-        
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            
-            setTimeout(() => {
-                card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, 200 + (index * 100));
-        });
-        
-        // Эффект при наведении на кнопки действий
-        const actionBtns = document.querySelectorAll('.action-btn');
-        
-        actionBtns.forEach(btn => {
-            btn.addEventListener('mouseenter', function() {
-                this.style.background = 'linear-gradient(135deg, rgba(0, 153, 255, 0.3), rgba(0, 243, 255, 0.2))';
-            });
-            
-            btn.addEventListener('mouseleave', function() {
-                this.style.background = '';
-            });
-        });
-        
-        // Динамическое свечение статусов
-        const statusBadges = document.querySelectorAll('.request-status');
-        
-        statusBadges.forEach(badge => {
-            const status = badge.className.match(/status-(\w+)/);
-            if (status) {
-                const colorMap = {
-                    'new': '#00ff88',
-                    'progress': '#ffcc00',
-                    'ready': '#0099ff',
-                    'completed': '#6600ff'
-                };
-                
-                const color = colorMap[status[1]] || '#0099ff';
-                
-                setInterval(() => {
-                    const intensity = 5 + Math.random() * 10;
-                    badge.style.boxShadow = `0 0 ${intensity}px ${color}`;
-                }, 2000);
-            }
-        });
-        
-        // Плавное появление всей страницы
-        document.querySelector('.profile-container').style.opacity = '0';
-        
+document.addEventListener('DOMContentLoaded', function() {
+    const avatar = document.querySelector('.profile-avatar');
+    avatar.style.animation = 'float 6s ease-in-out infinite';
+    
+    const cards = document.querySelectorAll('.info-card, .request-card, .form-section');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
         setTimeout(() => {
-            document.querySelector('.profile-container').style.transition = 'opacity 0.8s ease';
-            document.querySelector('.profile-container').style.opacity = '1';
-        }, 300);
+            card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 200 + (index * 100));
     });
+    
+    const actionBtns = document.querySelectorAll('.action-btn');
+    actionBtns.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.background = 'linear-gradient(135deg, rgba(0, 153, 255, 0.3), rgba(0, 243, 255, 0.2))';
+        });
+        btn.addEventListener('mouseleave', function() {
+            this.style.background = '';
+        });
+    });
+});
 </script>
+
 {% endblock %}

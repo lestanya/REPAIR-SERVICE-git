@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+{% block title %}RepairControl | Регистрация{% endblock %}
+
+{% block content %}
+<style>
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #0a0e1a 0%, #1a2338 100%);
+    }
+
+    .register-card {
+        background: linear-gradient(135deg, 
+            rgba(20, 30, 50, 0.95) 0%, 
+            rgba(15, 25, 45, 0.9) 100%);
+        backdrop-filter: blur(25px);
+        border-radius: 30px;
+        padding: 4rem;
+        width: 100%;
+        max-width: 500px;
+        border: 1px solid rgba(0, 243, 255, 0.3);
+        box-shadow: 
+            0 30px 60px rgba(0, 0, 0, 0.5),
+            0 0 50px rgba(0, 243, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .register-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent, rgba(0, 243, 255, 0.8), transparent);
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .register-title {
+        font-size: 2.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #00f3ff, #0066ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .register-subtitle {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(0, 255, 136, 0.15);
+        color: #80ffd4;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-group label {
+        display: block;
+        color: #80d4ff;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 1.2rem 1.5rem;
+        background: rgba(25, 35, 55, 0.8);
+        border: 2px solid rgba(0, 153, 255, 0.3);
+        border-radius: 15px;
+        color: #ffffff;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-group input:focus {
+        background: rgba(35, 45, 70, 0.9);
+        border-color: rgba(0, 243, 255, 0.6);
+        outline: none;
+        box-shadow: 
+            0 0 0 4px rgba(0, 243, 255, 0.15),
+            0 0 30px rgba(0, 243, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .password-strength {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        min-height: 20px;
+    }
+
+    .strength-weak { color: #ff6b6b; }
+    .strength-medium { color: #ffaa00; }
+    .strength-strong { color: #00ff88; }
+
+    .register-btn {
+        width: 100%;
+        padding: 1.3rem;
+        font-size: 1.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #00f3ff, #0066ff);
+        border: none;
+        color: #000;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 15px 35px rgba(0, 243, 255, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .register-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 25px 50px rgba(0, 243, 255, 0.6);
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .register-link a {
+        color: #00f3ff;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .register-link a:hover {
+        text-decoration: underline;
+    }
+
+    .error-message {
+        color: #ff6b6b;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        background: rgba(255, 107, 107, 0.1);
+        padding: 0.5rem;
+        border-radius: 8px;
+        border-left: 3px solid #ff6b6b;
+    }
+
+    @media (max-width: 768px) {
+        .register-container {
+            padding: 1rem;
+        }
+        .register-card {
+            padding: 2.5rem 2rem;
+        }
+        .register-title {
+            font-size: 2.2rem;
+        }
+    }
+</style>
+
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h1 class="register-title">
+                <i class="fas fa-user-plus"></i> Регистрация
+            </h1>
+            <p class="register-subtitle">Создайте аккаунт заказчика</p>
+            <div class="role-badge">
+                <i class="fas fa-user me-2"></i> Роль: Заказчик
+            </div>
+        </div>
+
+        <!-- Сообщения -->
+        {% if messages %}
+            {% for message in messages %}
+            <div style="
+                background: {% if message.tags == 'success' %}rgba(0, 255, 136, 0.2){% else %}rgba(255, 71, 87, 0.2){% endif %};
+                border: 1px solid {% if message.tags == 'success' %}rgba(0, 255, 136, 0.4){% else %}rgba(255, 71, 87, 0.4){% endif %};
+                color: {% if message.tags == 'success' %}#80ffd4{% else %}#ffcccc{% endif %};
+                padding: 1rem; border-radius: 12px; margin-bottom: 2rem;
+                backdrop-filter: blur(10px);
+            ">
+                <i class="fas 
+                    {% if message.tags == 'success' %}fa-check-circle
+                    {% else %}fa-exclamation-triangle{% endif %} me-2"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Форма регистрации -->
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- ФИО -->
+            <div class="form-group">
+                <label><i class="fas fa-user me-1"></i> ФИО</label>
+                {{ form.fio }}
+                {% if form.fio.errors %}
+                    {% for error in form.fio.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <!-- Телефон -->
+            <div class="form-group">
+                <label><i class="fas fa-phone me-1"></i> Телефон</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                    {% for error in form.phone.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <!-- Логин -->
+            <div class="form-group">
+                <label><i class="fas fa-user-circle me-1"></i> Логин</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    {% for error in form.username.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <!-- Пароль -->
+            <div class="form-group">
+                <label><i class="fas fa-lock me-1"></i> Пароль</label>
+                {{ form.password1 }}
+                <div id="passwordStrength" class="password-strength"></div>
+                {% if form.password1.errors %}
+                    {% for error in form.password1.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <!-- Подтверждение пароля -->
+            <div class="form-group">
+                <label><i class="fas fa-lock-open me-1"></i> Подтверждение пароля</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    {% for error in form.password2.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Кнопка регистрации -->
+            <button type="submit" class="register-btn">
+                <i class="fas fa-rocket me-2"></i> Создать аккаунт заказчика
+            </button>
+        </form>
+
+        <!-- Ссылка на вход -->
+        <div class="register-link">
+            <p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти в систему</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверка силы пароля
+    const passwordInput = document.querySelector('input[name="password1"]');
+    const strengthDiv = document.getElementById('passwordStrength');
+    
+    if (passwordInput && strengthDiv) {
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            // Критерии силы пароля
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            // Отображение силы
+            switch(strength) {
+                case 0: 
+                case 1: 
+                    strengthDiv.textContent = 'Слишком слабый';
+                    strengthDiv.className = 'password-strength strength-weak';
+                    break;
+                case 2: 
+                    strengthDiv.textContent = 'Средний';
+                    strengthDiv.className = 'password-strength strength-medium';
+                    break;
+                case 3:
+                case 4: 
+                    strengthDiv.textContent = 'Сильный ✓';
+                    strengthDiv.className = 'password-strength strength-strong';
+                    break;
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}
