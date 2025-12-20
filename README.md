@@ -11,7 +11,7 @@
 
 Выполни команду:
 
-    bash
+
     git clone https://github.com/lestanya/REPAIR-SERVICE-git.git
     cd REPAIR-SERVICE-git
 
@@ -19,8 +19,9 @@
 2. Виртуальное окружение и зависимости
 В проекте уже есть папка venv, но при необходимости окружение можно пересоздать:
 
-        bash
         python -m venv venv
+
+   
 Активировать окружение:
 
 Windows:
