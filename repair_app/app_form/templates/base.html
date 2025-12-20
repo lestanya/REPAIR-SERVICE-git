@@ -316,6 +316,31 @@
             border-color: var(--alien-green);
         }
 
+        /* Кнопка регистрации */
+        .nav-link.register {
+            background: linear-gradient(135deg, var(--deep-blue), var(--electric-blue));
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+        }
+
+        body.dark-theme .nav-link.register {
+            background: linear-gradient(135deg, var(--alien-green), var(--star-blue));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 255, 157, 0.4);
+        }
+
+        .nav-link.register:hover {
+            background: linear-gradient(135deg, var(--electric-blue), var(--neon-blue));
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.4);
+        }
+
+        body.dark-theme .nav-link.register:hover {
+            background: linear-gradient(135deg, var(--star-blue), var(--alien-green));
+            box-shadow: 0 8px 30px rgba(0, 255, 157, 0.6);
+        }
+
         /* Кнопка навигации */
         .navbar-toggler {
             border: 1px solid rgba(0, 102, 255, 0.3) !important;
@@ -385,7 +410,7 @@
             height: 100%;
             background: linear-gradient(90deg, 
                 transparent, 
-                rgba(0, 102, 255, 0.08), 
+                rgba(255, 255, 255, 0.08), 
                 transparent);
             transition: left 0.6s;
         }
@@ -553,6 +578,17 @@
                 height: 100px;
             }
         }
+        .navbar-brand {
+    color: var(--deep-blue) !important;
+    -webkit-text-fill-color: var(--deep-blue) !important;
+    text-fill-color: var(--deep-blue) !important;
+}
+
+body.dark-theme .navbar-brand {
+    color: var(--alien-green) !important;
+    -webkit-text-fill-color: var(--alien-green) !important;
+    text-fill-color: var(--alien-green) !important;
+}
     </style>
 </head>
 <body>
@@ -575,8 +611,8 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid px-4">
             <a class="navbar-brand" href="{% url 'index' %}">
-                <i class="fas {% if not user.is_authenticated %}fa-cloud-sun{% else %}fa-rocket{% endif %}"></i>
-                {% if user.is_authenticated %}SpaceRepair{% else %}RepairCloud{% endif %}
+
+                Главная
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
@@ -605,6 +641,10 @@
                     {% else %}
                         <a class="nav-link" href="{% url 'login' %}">
                             <i class="fas fa-key"></i>Доступ
+                        </a>
+                        <!-- Кнопка регистрации -->
+                        <a class="nav-link register" href="{% url 'register' %}">
+                            <i class="fas fa-user-plus"></i>Регистрация
                         </a>
                     {% endif %}
                 </div>
